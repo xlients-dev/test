@@ -3,5 +3,5 @@
 
 # install
 ```
-curl -LO https://raw.githubusercontent.com/xlients-dev/test/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/xlients-dev/test/main/install.sh | bash
 ```
