@@ -1,44 +1,53 @@
-echo "Welcome to obscat!"
+#!/usr/bin/env bash
+set -euo pipefail
 
-mkdir -p ~/.local
+echo "[+] Welcome to obscat!"
 
-cd ~/.local
+# Download area
+INSTALL_DIR="$HOME/.local/obscat"
+BIN_DIR="/usr/local/obscat/bin"
 
-echo "Downloading obscat@latest version..."
-wget https://github.com/xlients-dev/test/releases/download/test/obscat.tar.gz
+mkdir -p "$INSTALL_DIR"
+cd "$INSTALL_DIR"
 
-clear
+echo "[+] Downloading obscat@latest version..."
+wget -q --show-progress https://github.com/xlients-dev/test/releases/download/test/obscat.tar.gz
 
-echo "extracting file..."
+echo "[+] Extracting..."
 tar -xzf obscat.tar.gz
-sleep 2
-rm -rf obscat.tar.gz
-cd obscat
-echo "done."
+rm -f obscat.tar.gz
 
-echo "chmod binary..."
-cd bin
-chmod +x obscat obscatd
-cd ..
-echo "done"
+echo "[+] Making binaries executable..."
+chmod +x bin/obscat bin/obscatd
 
-sleep 1
-echo "moving folder bin to /usr/local/obscat"
-mkdir -p /usr/local/obscat
-mv bin /usr/local/obscat
+echo "[+] Moving binaries to $BIN_DIR..."
+sudo mkdir -p /usr/local/obscat
+sudo mv bin /usr/local/obscat/
 
-sleep 1
-echo "exporting bin to PATH"
-export PATH=$PATH:/usr/local/obscat/bin
-obscat version
+# Persistent PATH update
+if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
+  echo "export PATH=\$PATH:$BIN_DIR"
+  export PATH="$PATH:$BIN_DIR"
+fi
 
-echo "Installing dependencies..."
-sudo apt update && sudo apt install nginx postgresql -y
-export PATH=$PATH:/usr/lib/postgresql/17/bin
-postgres
-echo "done."
+echo "[+] Testing obscat binary..."
+obscat version || {
+  echo "[-] Failed to run obscat"
+  exit 1
+}
 
-echo "Setting up database"
-sleep 3
-cd ~/.local/obscat/
-bash setupdb.sh
+echo "[+] Installing dependencies..."
+sudo apt update -y
+sudo apt install -y nginx postgresql
+
+# Add PostgreSQL bin to PATH (persistent)
+PG_BIN="/usr/lib/postgresql/17/bin"
+if [[ -d "$PG_BIN" && ":$PATH:" != *":$PG_BIN:"* ]]; then
+  echo "export PATH=\$PATH:$PG_BIN"
+  export PATH="$PATH:$PG_BIN"
+fi
+
+echo "[+] Setting up database..."
+bash "$INSTALL_DIR/setupdb.sh"
+
+echo "[✓] Installation complete! Please restart your shell or run: source"
