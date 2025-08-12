@@ -7,8 +7,8 @@ echo "[+] Welcome to obscat!"
 INSTALL_DIR="$HOME/.local/obscat"
 BIN_DIR="/usr/local/obscat/bin"
 
-mkdir -p "$INSTALL_DIR"
-cd "$INSTALL_DIR"
+mkdir -p $HOME/.local
+cd $HOME/.local/
 
 echo "[+] Downloading obscat@latest version..."
 wget -q --show-progress https://github.com/xlients-dev/test/releases/download/test/obscat.tar.gz
@@ -17,12 +17,12 @@ echo "[+] Extracting..."
 tar -xzf obscat.tar.gz
 rm -f obscat.tar.gz
 
-echo "[+] Making binaries executable..."
-chmod +x bin/obscat bin/obscatd
-
 echo "[+] Moving binaries to $BIN_DIR..."
 sudo mkdir -p /usr/local/obscat
-sudo mv bin /usr/local/obscat/
+sudo mv $INSTALL_DIR/bin /usr/local/obscat/
+
+echo "[+] Chmod executable binaries..."
+chmod +x $BIN_DIR/obscat $BIN_DIR/obscatd
 
 # Persistent PATH update
 if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
